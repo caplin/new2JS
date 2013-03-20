@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>new2JS</title>
+	<script type="text/javascript" src="lib/codemirror-compressed.js"></script>
+	<link rel="stylesheet" href="lib/codemirror.css">
+	<style>
+		body {
+			font-family: sans-serif;
+		}
+		#codeEntry {
+			border: 1px solid #ddd;
+		}
+
+		.ObjectRenderer, .ObjectRenderer pre, .ObjectRenderer dl {
+			margin: 0;
+		}
+		.ObjectRenderer pre {
+			overflow: auto;
+		}
+		.ObjectRenderer .none {
+			color: #5c5c5c;
+			font-style: italic;
+		}
+		.ObjectRenderer dl {
+			margin-left: 5em;
+		}
+		.ObjectRenderer dt {
+			margin-left: -5em;
+			padding-right: 1em;
+			float: left;
+			clear: left;
+		}
+		.ObjectRenderer dt:after {
+			content: ":"
+		}
+		.ObjectRenderer dd {
+			margin-left: 0;
+			float: left;
+			clear: right;
+		}
+		.ObjectRenderer dl:after {
+			clear: both;
+			display: block;
+			content: '.';
+			visibility: hidden;
+			height: 0px;
+		}
+		.ObjectRenderer .shortform, .ObjectRenderer .longform {
+			cursor: pointer;
+		}
+
+		.ObjectRenderer .highlightpulse {
+			background-color: black;
+			color: white;
+		}
+
+		.ObjectRenderer {
+			border: 1px solid #ddd;
+			background-color: #ffffe0;
+			overflow: hidden;
+			display: inline-block;
+			vertical-align: top;
+		}
+		.ObjectRenderer dt {
+			font-weight: bold;
+		}
+
+	</style>
+	<script>
+
+		function renderLogMsg(msg) {
+			var result = document.createElement('div');
+			var messageParts = msg.split(/(\{\d+\})/g);
+			for (var i = 0; i < messageParts.length; ++i) {
+				var txt = messageParts[i];
+				var m = txt.match(/^\{(\d+)\}$/);
+				if (m) {
+					result.appendChild(toDom(arguments[Number(m[1]) + 1], true))
+				} else {
+					result.appendChild(document.createTextNode(txt));
+				}
+			}
+			return result;
+		}
+
+		function addShortAndLongForm(parent, short, long, startExpanded) {
+			var showShortForm = ! startExpanded;
+
+			short.style.display = showShortForm ? '' : 'none';
+			long.style.display = showShortForm ? 'none' : '';
+
+			parent.appendChild(short);
+			parent.appendChild(long);
+
+			parent.onclick = function(event) {
+				showShortForm = ! showShortForm;
+				long.style.display = showShortForm ? 'none' : '';
+				short.style.display = showShortForm ? '' : 'none';
+				event.cancelBubble = true;
+				if (event.stopPropagation) event.stopPropagation();
+			}
+		}
+
+		function ObjectRenderer() {		}
+
+		ObjectRenderer.getPrimitiveRenderer = function() {
+			var classes = Array.prototype.join.call(arguments, " ");
+			return function(value) {
+				var result = document.createElement('span');
+				result.className = 'primitive '+classes;
+				result.appendChild(document.createTextNode(String(value)));
+				return result;
+			}
+		};
+
+		ObjectRenderer._addShortAndLongForm = function(parent, short, long, expanded) {
+			var showShortForm = ! expanded;
+
+			short.style.display = showShortForm ? '' : 'none';
+			long.style.display = showShortForm ? 'none' : '';
+
+			parent.appendChild(short);
+			parent.appendChild(long);
+
+			parent.onclick = function(event) {
+				showShortForm = ! showShortForm;
+				long.style.display = showShortForm ? 'none' : '';
+				short.style.display = showShortForm ? '' : 'none';
+				event.cancelBubble = true;
+				if (event.stopPropagation) event.stopPropagation();
+			}
+		};
+
+		ObjectRenderer.prototype.render = function(value, minimised) {
+			var result = document.createElement('div');
+			result.className = 'ObjectRenderer';
+			result.appendChild(this._render(value, [], [], ! minimised));
+			return result;
+		};
+
+		ObjectRenderer.prototype._render = function(value, renderedObjects, objectElements, expanded) {
+			var type = typeof value;
+			type = type.charAt(0).toUpperCase() + type.substring(1);
+			var result = this['render' + type](value, renderedObjects, objectElements, expanded);
+			return result;
+		};
+
+		ObjectRenderer.prototype.renderUndefined = ObjectRenderer.getPrimitiveRenderer('undefined', 'none');
+		ObjectRenderer.prototype.renderString = ObjectRenderer.getPrimitiveRenderer('string');
+		ObjectRenderer.prototype.renderNumber = ObjectRenderer.getPrimitiveRenderer('number');
+		ObjectRenderer.prototype.renderBoolean = ObjectRenderer.getPrimitiveRenderer('boolean');
+		ObjectRenderer.prototype.renderFunction = function(value, renderedObjects, objectElements, expanded) {
+			var result = document.createElement('div');
+			result.className = 'primitive function ' + value.name;
+
+			var longForm = document.createElement('pre');
+			longForm.className = 'longform';
+			longForm.appendChild(document.createTextNode(value.toString()));
+			var shortForm = document.createElement('span');
+			shortForm.className = 'shortform';
+			shortForm.appendChild(document.createTextNode(value.toString().substring(0, 20)+"..."));
+
+			ObjectRenderer._addShortAndLongForm(result, shortForm, longForm, expanded);
+			return result;
+		};
+		ObjectRenderer.prototype.renderObject = function(value, renderedObjects, objectElements, expanded) {
+			if (value === null) {
+				return this.renderNull();
+			} else if (Object.prototype.toString.call(value) === "[object Array]" ) {
+				return this.renderArray(value, renderedObjects, objectElements, expanded);
+			} else {
+				return this.renderPlainObject(value, renderedObjects, objectElements, expanded);
+			}
+		};
+		ObjectRenderer.prototype.renderNull = function() {
+			var result = document.createElement('div');
+			result.className = 'object null none';
+			result.appendChild(document.createTextNode('null'));
+			return result;
+		};
+		ObjectRenderer.prototype.renderArray = function(value, renderedObjects, objectElements, expanded) {
+			var result = this.renderPlainObject(value, renderedObjects, objectElements, expanded);
+			result.className +=" array";
+			return result;
+		};
+		ObjectRenderer.prototype.renderDuplicate = function(value, renderedElement) {
+			var pointer = document.createElement('a');
+			pointer.className = 'pointer';
+			pointer.appendChild(document.createTextNode('(already rendered...)'));
+			pointer.onmouseover = function() {
+				renderedElement.classList.add('highlightpulse');
+				setTimeout(function() {
+					renderedElement.classList.remove('highlightpulse');
+				}, 1000);
+			};
+			return pointer;
+		};
+		ObjectRenderer.prototype.renderPlainObject = function(obj, renderedObjects, objectElements, expanded) {
+			var idx = renderedObjects.indexOf(obj);
+			if (idx >= 0) {
+				return this.renderDuplicate(obj, objectElements[idx]);
+			}
+
+			var result = document.createElement('div');
+			result.className = 'object';
+			if (obj.constructor && obj.constructor.name) {
+				result.className += ' '+obj.constructor.name;
+			}
+
+			renderedObjects.push(obj);
+			objectElements.push(result);
+
+			var longForm = document.createElement('dl');
+			longForm.className = 'longform';
+			for (var key in obj) {
+				var label = document.createElement('dt');
+				label.appendChild(document.createTextNode(key));
+				longForm.appendChild(label);
+				var val = document.createElement('dd');
+				val.appendChild(this._render(obj[key], renderedObjects, objectElements, false));
+				longForm.appendChild(val);
+			}
+
+			var rootRendered = false;
+			var shortFormTxt = JSON.stringify(obj, function(key, value) {
+				if (value == obj && ! rootRendered) {
+					rootRendered = true;
+					return value;
+				}
+				if (renderedObjects.indexOf(value) >= 0) {return "..."};
+				return value;
+			});
+
+			if (shortFormTxt.length > 83) {
+				shortFormTxt = shortFormTxt.substring(0, 80) + " ...";
+			}
+
+			var shortForm = document.createElement('span');
+			shortForm.className = 'shortform';
+			shortForm.appendChild(document.createTextNode(shortFormTxt));
+
+			ObjectRenderer._addShortAndLongForm(result, shortForm, longForm, expanded);
+
+			return result;
+		};
+
+		function toDom(obj, startMinimised) {
+			var alreadyRendered = [];
+			var alreadyDom = [];
+			var startExpanded = ! startMinimised;
+
+			function _toDom(obj, startExpanded) {
+				var idx = alreadyRendered.indexOf(obj);
+				if (idx >= 0) {
+					var pointer = document.createElement('a');
+					pointer.className = 'pointer';
+					pointer.appendChild(document.createTextNode('(already rendered...)'));
+					pointer.onmouseover = function() {
+						alreadyDom[idx].classList.add('highlightpulse');
+						setTimeout(function() {
+							alreadyDom[idx].classList.remove('highlightpulse');
+						}, 1000);
+					}
+					return pointer;
+				}
+
+				var result;
+				var type = typeof obj;
+
+				if (type === 'undefined') {
+					result = document.createElement('span');
+					result.appendChild(document.createTextNode('undefined'));
+					result.className = 'undefined none';
+				}
+
+				if (type === 'string' || type === 'number' || type == 'boolean') {
+					result = document.createElement('span');
+					result.className = type;
+					result.appendChild(document.createTextNode(obj));
+				}
+
+				if (type === 'object') {
+					result = document.createElement('div');
+					if (obj === null) {
+						result.className = 'object null none';
+						result.appendChild(document.createTextNode('null'));
+						return result;
+					}
+
+					alreadyRendered.push(obj);
+					alreadyDom.push(result);
+
+					result.className = 'object';
+
+					if (obj.constructor.name) {
+						result.className += ' '+obj.constructor.name;
+					}
+					var longForm = document.createElement('dl');
+					longForm.className = 'longform';
+					for (var key in obj) {
+						var label = document.createElement('dt');
+						label.appendChild(document.createTextNode(key));
+						longForm.appendChild(label);
+						var val = document.createElement('dd');
+						val.appendChild(_toDom(obj[key], false));
+						longForm.appendChild(val);
+					}
+
+					var rootRendered = false;
+					var shortFormTxt = JSON.stringify(obj, function(key, value) {
+						if (value == obj && ! rootRendered) {
+							rootRendered = true;
+							return value;
+						}
+						if (alreadyRendered.indexOf(value) >= 0) {return "..."};
+						return value;
+					});
+
+					if (shortFormTxt.length > 83) {
+						shortFormTxt = shortFormTxt.substring(0, 80) + " ...";
+					}
+
+					var shortForm = document.createElement('span');
+					shortForm.className = 'shortform';
+					shortForm.appendChild(document.createTextNode(shortFormTxt));
+
+					addShortAndLongForm(result, shortForm, longForm, startExpanded);
+				}
+				if (type === 'function') {
+					result =  document.createElement('div');
+					result.className = type;
+
+					var longForm = document.createElement('pre');
+					longForm.className = 'longform';
+					longForm.appendChild(document.createTextNode(obj.toString()));
+					var shortForm = document.createElement('span');
+					shortForm.className = 'shortform';
+					shortForm.appendChild(document.createTextNode(obj.toString().substring(0, 20)+"..."));
+
+					addShortAndLongForm(result, shortForm, longForm, startExpanded);
+				}
+
+				return result;
+			}
+			var result = document.createElement('div');
+			result.appendChild(_toDom(obj, startExpanded));
+			result.className = 'toDom';
+			return result;
+		}
+
+	</script>
+</head>
+<body>
+	New to JS?
+
+	<div id="codeEntry"></div>
+
+	<script type="text/javascript">
+		var codeEntry = document.getElementById('codeEntry');
+		var executionContext = {
+			cat: "hat"
+		};
+		var editor = CodeMirror(codeEntry, {
+			value: "function myScript() {return 100;}\n",
+			mode: "javascript",
+			lineNumbers: true,
+			extraKeys: {
+				"Ctrl-Enter": function() {
+					var js = editor.getValue();
+
+					with (executionContext) {
+						var obj = eval(js);
+					}
+
+					var result = JSON.stringify(obj, null, 4)
+					console.log(result);
+				}
+			}
+		});
+
+		var obj = {
+			"hello": "there",
+			"boom": {
+				inner: 23
+			},
+			"other": undefined,
+			"this": false,
+			"thingy": [1, 23, 4, {a:1, b:2}],
+			func: toDom,
+			"something with a really long key name that won't fit": 9999,
+			temp: null
+		};
+		obj.boom.recursive = obj;
+		obj.xxx = obj.boom;
+
+		var or = new ObjectRenderer();
+		document.body.appendChild(or.render(obj));
+
+//		document.body.appendChild(renderLogMsg("Hello {0}, it's a great day {1} for fishing", "Bob", obj));
+
+	</script>
+</body>
+</html>
