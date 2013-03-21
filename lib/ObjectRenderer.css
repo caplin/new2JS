@@ -1,0 +1,93 @@
+.ObjectRenderer {
+    border: 1px solid #ddd;
+    background-color: #ffffe0;
+    overflow: hidden;
+    padding: 2px;
+}
+
+.ObjectRendererLog .ObjectRenderer {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.ObjectRenderer, .ObjectRenderer dl {
+    margin: 0;
+}
+.ObjectRenderer .prototype {
+    visibility: hidden;
+    width: 0;
+}
+.ObjectRenderer .prototype:before {
+    visibility: visible;
+    content: "prototype:";
+    font-style: italic;
+}
+.ObjectRenderer dd {
+    margin-left: 0;
+    float: left;
+    clear: right;
+}
+.ObjectRenderer dl {
+    margin-left: 5em;
+}
+.ObjectRenderer dl:after {
+    clear: both;
+    display: block;
+    content: '.';
+    visibility: hidden;
+    height: 0px;
+}
+.ObjectRenderer dt {
+    margin-left: -5em;
+    padding-right: 1em;
+    float: left;
+    clear: left;
+}
+.ObjectRenderer dt:after {
+    content: ":"
+}
+
+.ObjectRenderer .string:before {
+    content: '"';
+    color: #696969;
+}
+.ObjectRenderer .string:after {
+    content: '"';
+    color: #696969;
+}
+
+.ObjectRenderer .longform {
+    cursor: pointer;
+}
+
+.ObjectRenderer .shortform {
+    font-style: italic;
+    cursor: pointer;
+}
+
+.ObjectRenderer .highlightpulse {
+    background-color: black;
+    color: white;
+}
+.ObjectRenderer dt {
+    color: purple;
+}
+
+.ObjectRenderer .none {
+    color: #5c5c5c;
+}
+
+.ObjectRenderer .string {
+    color: red;
+}
+
+.ObjectRenderer .number {
+    color: blue;
+}
+
+.ObjectRenderer .error {
+    background-color: #cd5c5c;
+    margin: 0;
+    padding: 4px;
+    border: 1px solid red;
+}
