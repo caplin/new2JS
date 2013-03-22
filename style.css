@@ -39,8 +39,8 @@ body {
 #top button {
 	position: absolute;
 	height: 2em;
-	border: 2px ridge;
 	width: 60px;
+	border: 1px outset;
 	z-index: 100;
 }
 #top button.next {
