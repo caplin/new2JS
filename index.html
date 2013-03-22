@@ -6,78 +6,11 @@
 	<link rel="stylesheet" href="lib/codemirror.css">
 
 	<script type="text/javascript" src="lib/ObjectRenderer.js"></script>
+	<script type="text/javascript" src="lib/CMRenderer.js"></script>
 	<link rel="stylesheet" href="lib/ObjectRenderer.css">
-	<style>
-		html {
-			margin: 0;
-			padding: 0;
-			height: 100%;
-		}
-		body {
-			margin: 0;
-			padding: 0;
-			font-family: sans-serif;
-			overflow: hidden;
-			height: 100%;
-		}
-		.ObjectRenderer .function {
-			border: 1px solid #ddd;
-		}
-		#codeEntry {
-			border: 1px solid #ddd;
-			height: 100%;
-			z-index: 1;
-		}
-		#codeEntry .CodeMirror {
-			height: 100%;
-		}
-		#top {
-			position: absolute;
-			top: 0;
-			bottom: 0;
-			left: 0;
-			right: 50%;
-		}
-		#history {
-			overflow: scroll;
-			position: absolute;
-			top: 0;
-			bottom: 0;
-			left: 50%;
-			right: 0;
-		}
-		#top #buttons {
-			position: absolute;
-			bottom: 18px;
-			left: 2em;
-			right: 0;
-			z-index: 10;
-		}
-		#top button {
-			height: 2em;
-		}
-		button.next, button.run {
-			float: right;
-		}
-		#history h1 {
-			padding-left: 30px;
-		}
-		#history p {
-			margin: 30px;
-		}
-		.result .none {
-			color: #4a4a4a;
-			font-size: small;
-		}
-		#history .coderun {
-			margin: 0;
-			overflow: hidden;
-			background-color: #dcdcdc;
-			border-top: 2px ridge;
-			border-bottom: 2px ridge
-		}
 
-	</style>
+	<link rel="stylesheet" href="style.css">
+
 </head>
 <body>
 	<div id="top">
@@ -161,30 +94,6 @@
 			}
 		};
 		xhr.send(null);
-
-		function CMRenderer() {
-			ObjectRenderer.call(this);
-		};
-		CMRenderer.prototype = Object.create(ObjectRenderer.prototype);
-		CMRenderer.prototype.renderFunctionDetail = function(value) {
-			var result = document.createElement('div');
-			var display = CodeMirror(function(elm) {
-				result.appendChild(elm);
-			}, {
-				value: value.toString(),
-				mode:  "javascript",
-				lineNumbers: true,
-				readOnly: 'nocursor'
-			});
-			result.editor = display;
-			return result;
-		};
-		CMRenderer.prototype.toggleDetail = function(result, value, summary, detail, showSummary) {
-			ObjectRenderer.prototype.toggleDetail.apply(this, arguments);
-			if (detail.editor) {
-				detail.editor.refresh();
-			}
-		};
 
 		var or = new CMRenderer();
 
