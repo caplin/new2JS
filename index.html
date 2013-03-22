@@ -17,18 +17,18 @@
 <body>
 	<div id="top">
 		<div id="codeEntry"></div>
-		<div id="buttons">
-			<button onclick="app.executionContext.reset()" class="reset">Reset</button>
-			<button onclick="app.executionContext.clear()" class="reset">Clear</button>
-			<button onclick="app.executionContext.next()" class="next">Next</button>
-			<button onclick="app.executeCurrent()" class="run">Run</button>
-			<button onclick="app.executionContext.back()" class="back">Back</button>
-		</div>
+		<button onclick="app.executionContext.reset()" class="reset">Reset</button>
+		<button onclick="app.executionContext.clear()" class="clear">Clear</button>
+		<button onclick="app.executionContext.next()" class="next">Next</button>
+		<button onclick="app.executeCurrent()" class="run">Run</button>
+		<button onclick="app.executionContext.back()" class="back">Back</button>
 	</div>
 	<div id="history">
 		<h1>New to JS?</h1>
-		<p>Welcome.  This area keeps a record of what you do and also shows you the things that your
-		javascript program displays.  You can write javascript programs on the left hand side.</p>
+		<p>Welcome.<p>
+		<p>This area keeps a record of what you do and also shows you the things that your
+		javascript program displays.  You can page through the tutorial and write javascript programs
+		on the left hand side.</p>
 	</div>
 	<script type="text/javascript">
 		var codeEntry = document.getElementById('codeEntry');

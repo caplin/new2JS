@@ -43,6 +43,10 @@ App.prototype.execute = function(funcString) {
 	var code = document.createElement('pre');
 	code.appendChild(document.createTextNode(funcString));
 	code.className = 'coderun';
+	var editor = this.editor;
+	code.onclick = function() {
+		editor.setValue(funcString);
+	};
 	this.history.appendChild(code);
 	var result;
 	try {

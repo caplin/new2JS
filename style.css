@@ -1,68 +1,94 @@
 html {
-    margin: 0;
-    padding: 0;
-    height: 100%;
+	margin: 0;
+	padding: 0;
+	height: 100%;
 }
 body {
-    margin: 0;
-    padding: 0;
-    font-family: sans-serif;
-    overflow: hidden;
-    height: 100%;
+	margin: 0;
+	padding: 0;
+	font-family: sans-serif;
+	overflow: hidden;
+	height: 100%;
 }
 .ObjectRenderer .function {
-    border: 1px solid #ddd;
+	border: 1px solid #ddd;
 }
 #codeEntry {
-    border: 1px solid #ddd;
-    height: 100%;
-    z-index: 1;
+	border: 1px solid #ddd;
+	height: 100%;
+	z-index: 1;
 }
 #codeEntry .CodeMirror {
-    height: 100%;
+	height: 100%;
 }
 #top {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 50%;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 50%;
 }
 #history {
-    overflow: scroll;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 50%;
-    right: 0;
-}
-#top #buttons {
-    position: absolute;
-    bottom: 18px;
-    left: 2em;
-    right: 0;
-    z-index: 10;
+	overflow: scroll;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 50%;
+	right: 0;
 }
 #top button {
-    height: 2em;
+	position: absolute;
+	height: 2em;
+	border: 2px ridge;
+	width: 60px;
+	z-index: 100;
 }
-button.next, button.run {
-    float: right;
+#top button.next {
+	top: 2px;
+	right: 19px;
+	border-radius: 12px;
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
 }
+
+#top button.run {
+	top: 2px;
+	right: 79px;
+	width: 70px;
+}
+
+#top button.back {
+	top: 2px;
+	right: 149px;
+	border-radius: 12px;
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+}
+
+#top button.clear {
+	bottom: 16px;
+	right: 79px;
+}
+
+#top button.reset {
+	bottom: 16px;
+	right: 19px;
+}
+
 #history h1 {
-    padding-left: 30px;
+	padding-left: 30px;
 }
 #history p {
-    margin: 30px;
+	margin: 30px;
 }
 .result .none {
-    color: #4a4a4a;
-    font-size: small;
+	color: #4a4a4a;
+	font-size: small;
 }
 #history .coderun {
-    margin: 0;
-    overflow: hidden;
-    background-color: #dcdcdc;
-    border-top: 2px ridge;
-    border-bottom: 2px ridge
+	margin: 0;
+	overflow: hidden;
+	background-color: #dcdcdc;
+	border-top: 2px ridge;
+	border-bottom: 2px ridge
 }
