@@ -5,23 +5,24 @@
 	<script type="text/javascript" src="lib/codemirror-compressed.js"></script>
 	<link rel="stylesheet" href="lib/codemirror.css">
 
+	<script type="text/javascript" src="lib/Emitter.js"></script>
 	<script type="text/javascript" src="lib/ObjectRenderer.js"></script>
 	<script type="text/javascript" src="lib/CMRenderer.js"></script>
 	<link rel="stylesheet" href="lib/ObjectRenderer.css">
-		button.back, button.run, button.next {
 
+	<script type="text/javascript" src="src/Tutorial.js"></script>
+	<script type="text/javascript" src="src/App.js"></script>
 	<link rel="stylesheet" href="style.css">
-
 </head>
 <body>
 	<div id="top">
 		<div id="codeEntry"></div>
 		<div id="buttons">
-			<button onclick="executionContext.reset()" class="reset">Reset</button>
-			<button onclick="executionContext.clear()" class="reset">Clear</button>
-			<button onclick="executionContext.next()" class="next">Next</button>
-			<button onclick="executeCurrentContents()" class="run">Run</button>
-			<button onclick="executionContext.back()" class="back">Back</button>
+			<button onclick="app.executionContext.reset()" class="reset">Reset</button>
+			<button onclick="app.executionContext.clear()" class="reset">Clear</button>
+			<button onclick="app.executionContext.next()" class="next">Next</button>
+			<button onclick="app.executeCurrent()" class="run">Run</button>
+			<button onclick="app.executionContext.back()" class="back">Back</button>
 		</div>
 	</div>
 	<div id="history">
@@ -29,96 +30,11 @@
 		<p>Welcome.  This area keeps a record of what you do and also shows you the things that your
 		javascript program displays.  You can write javascript programs on the left hand side.</p>
 	</div>
-
 	<script type="text/javascript">
 		var codeEntry = document.getElementById('codeEntry');
 		var history = document.getElementById('history');
 
-		function executeCurrentContents() {
-			var js = editor.getValue();
-			runAndLog(js, executionContext);
-		}
-
-		var editor = CodeMirror(codeEntry, {
-			mode: "javascript",
-			lineNumbers: true,
-			extraKeys: {
-				"Ctrl-Enter": executeCurrentContents
-			}
-		});
-
-		var blocks = [];
-		var currentBlock = -1;
-
-		var executionContext = {
-			show: function() {
-				history.appendChild(or.getLogElement.apply(or, arguments));
-			},
-			global: function(name, val) {
-				executionContext[name] = val;
-			},
-			next: function() {
-				if (++currentBlock < blocks.length) {
-					editor.setValue(blocks[currentBlock]);
-				} else {
-					currentBlock--
-				}
-			},
-			reset: function() {
-				editor.setValue(blocks[currentBlock]);
-			},
-			clear: function() {
-				editor.setValue("");
-			},
-			back: function() {
-				if (--currentBlock >= 0) {
-					editor.setValue(blocks[currentBlock]);
-				} else {
-					currentBlock++
-				}
-			},
-			lomu: undefined,
-			weepu: undefined
-		};
-
-		var xhr = new XMLHttpRequest();
-		xhr.open("GET", "learningScript.js");
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState == 4) {
-				if (xhr.status == 200) {
-					var js = xhr.responseText;
-					blocks = js.split(/\/\* Next Section \*\/[\r\n]+/);
-					executionContext.next();
-				} else {
-					console.log("ERROR");
-				}
-			}
-		};
-		xhr.send(null);
-
-		var or = new CMRenderer();
-
-		function runAndLog(funcString, executionContext) {
-			var code = document.createElement('pre');
-			code.appendChild(document.createTextNode(funcString));
-			history.appendChild(code);
-			code.className = 'coderun';
-			var result;
-			try {
-				with(executionContext) {
-					result = eval(funcString);
-				}
-			} catch (e) {
-				result = e;
-			}
-			if (result !== undefined) {
-				result = or.getElement(result);
-				result.className += ' result';
-				history.appendChild(result);
-			}
-			history.scrollTop = history.scrollHeight - history.clientHeight;
-		}
-
+		var app = new App(codeEntry, history, "learningScript.js");
 	</script>
 </body>
 </html>
