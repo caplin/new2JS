@@ -7,7 +7,9 @@ function App(codeEntry, history, url) {
 		mode: "javascript",
 		lineNumbers: true,
 		extraKeys: {
-			"Ctrl-Enter": this.executeCurrent.bind(this)
+			"Ctrl-Enter": this.executeCurrent.bind(this),
+			"Ctrl-Right": tutorial.next.bind(tutorial),
+			"Ctrl-Left": tutorial.back.bind(tutorial)
 		}
 	});
 	this.executionContext = {
