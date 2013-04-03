@@ -67,6 +67,7 @@ var person = "Adam";
 var array  = [];
 var regex = /hello (.*)/;
 var nothing = null;
+var nothingAndIReallyMeanIt = undefined;
 
 // Javascript does have types, but they are implicit
 // and variables can contain values of any type.
